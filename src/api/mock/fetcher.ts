@@ -1,0 +1,307 @@
+// The `fetch` replacement given to configureClient: picks the mocked groups, applies ?scenario=, routes to a handler.
+import { errorResponse, MockHttpError, successResponse } from './http.ts'
+import type { Reply } from './http.ts'
+import { advanceOrders, payLatestKioskOrder, permissionsOfUser, raiseAlert, routes, setHeartbeat, syncHeartbeats } from './handlers.ts'
+import { advanceMaintenanceCommands } from './work-orders.ts'
+import type { HandlerContext, KioskSimulation, Policy, RaiseAlertInput } from './handlers.ts'
+import { expireSince, readScenario, scenarioApplies } from './scenario.ts'
+import type { Scenario, ScenarioStorage } from './scenario.ts'
+import { createStore } from './seed.ts'
+import type { MockAlert, MockUser } from './seed.ts'
+
+export const MOCK_GROUPS = ['auth', 'users', 'products', 'machines', 'slots', 'kiosk-credentials', 'batches', 'inventory', 'orders', 'payments', 'webhook-logs', 'kiosk', 'roles', 'alerts', 'telemetry', 'tickets', 'maintenance-schedules', 'maintenance-commands', 'pricing', 'customer-reports', 'refunds', 'reports', 'dashboard'] as const
+export type MockGroup = (typeof MOCK_GROUPS)[number]
+
+export interface MockSelection { all: boolean; groups: MockGroup[]; unknown: string[] }
+
+/** `all`, or a comma-separated list of groups. Empty means off (see isMockEnabled). */
+export function parseSelection(raw: string | null | undefined): MockSelection {
+  const names = (raw ?? '').split(',').map(name => name.trim().toLowerCase()).filter(Boolean)
+  const groups = MOCK_GROUPS.filter(group => names.includes(group))
+  return { all: names.includes('all'), groups, unknown: names.filter(name => name !== 'all' && !MOCK_GROUPS.includes(name as MockGroup)) }
+}
+export const isMockEnabled = (selection: MockSelection) => selection.all || selection.groups.length > 0
+
+const TOP_LEVEL_GROUPS: Record<string, MockGroup> = {
+  auth: 'auth', users: 'users', products: 'products', machines: 'machines', 'product-batches': 'batches',
+  inventory: 'inventory', orders: 'orders', payments: 'payments', 'payment-webhook-logs': 'webhook-logs', kiosk: 'kiosk',
+  roles: 'roles', permissions: 'roles',
+  // Alerts of backend #58 (api.yaml); POST /alerts/{id}/work-orders belongs here too.
+  alerts: 'alerts',
+  // Refunds of backend #72 (api.yaml): candidates, list, summary; POST /payments/{id}/refund belongs here too.
+  refunds: 'refunds',
+  // Work orders of backend #66/#68 (api.yaml): list, detail, actions, restock lines and loads.
+  'work-orders': 'tickets',
+  // Customer reports of backend #74 (api.yaml): list, detail, photos, review / resolve / reject.
+  'customer-reports': 'customer-reports',
+  // Maintenance plans of backend #70 (api.yaml); the group keeps the name of the screen.
+  'maintenance-plans': 'maintenance-schedules',
+  // Maintenance commands of backend #64 (history, detail, reconcile).
+  'maintenance-commands': 'maintenance-commands',
+  // Near-expiry discount setting of backend #61.
+  pricing: 'pricing',
+  // Sales reports of backend #76 (summary, timeseries, peak hours, products, machines, export).
+  reports: 'reports',
+  // Dashboard of backend #76 (GET /dashboard/overview).
+  dashboard: 'dashboard',
+}
+
+export function groupOf(path: string): MockGroup | null {
+  // Maintenance commands of backend #64: one column's command and the controller RESET (before the slots group).
+  if (/^\/machines\/[^/]+\/(slots\/[^/]+\/maintenance-commands|reset)\/?$/.test(path)) return 'maintenance-commands'
+  // Restock suggestions and the restock work order from them (backend #68) belong to the work orders.
+  if (/^\/machines\/[^/]+\/(restock-suggestions|restock-work-orders)\/?$/.test(path)) return 'tickets'
+  if (/^\/machines\/[^/]+\/kiosk-credentials(\/|$)/.test(path)) return 'kiosk-credentials'
+  if (/^\/machines\/[^/]+\/slots(\/|$)/.test(path)) return 'slots'
+  // Backend #72: recording a refund belongs with GET /refunds, not with the payments.
+  if (/^\/payments\/[^/]+\/refund\/?$/.test(path)) return 'refunds'
+  // Backend #74: rotating the public report token of a machine goes with the customer reports.
+  if (/^\/machines\/[^/]+\/report-token\/rotate\/?$/.test(path)) return 'customer-reports'
+  // Telemetry and events of backend #53/#56 (api.yaml): their own group, so they can be mocked while machines are real.
+  if (/^\/machines\/[^/]+\/(telemetry|events)(\/|$)/.test(path)) return 'telemetry'
+  // Backend #74: the public report form (no account) and the kiosk's report link.
+  if (/^\/public\/report-forms(\/|$)/.test(path)) return 'customer-reports'
+  if (/^\/kiosk\/incident-report-link\/?$/.test(path)) return 'customer-reports'
+  return TOP_LEVEL_GROUPS[path.split('/')[1] ?? ''] ?? null
+}
+
+export interface MockOptions {
+  /** Used for endpoints outside the selected groups. */
+  realFetch: typeof fetch
+  /** Query string of the page (not of the API call), for ?scenario=. */
+  getSearch: () => string
+  storage: ScenarioStorage | null
+  latencyMs: number
+  slowMs: number
+  now: () => number
+  /** Delay before a kiosk QR counts as paid; the `pending` scenario turns this off. */
+  autoPayMs: number
+  dispenseMs: number
+}
+
+const API_PREFIX = '/api/v1'
+const SCENARIO_ERRORS: Partial<Record<Scenario['name'], { status: number; message: string }>> = {
+  error500: { status: 500, message: 'An unexpected error occurred' },
+  401: { status: 401, message: 'Authentication required or access token invalid' },
+  403: { status: 403, message: 'Access denied' },
+  400: { status: 400, message: 'Dữ liệu gửi lên chưa hợp lệ.' },
+  409: { status: 409, message: 'Thao tác xung đột với trạng thái hiện tại của dữ liệu.' },
+  // What Spring answers for a path no controller maps yet (NoResourceFoundException).
+  missing: { status: 404, message: 'No static resource found.' },
+}
+
+/**
+ * Message of the `409` scenario on paths whose contract example names a specific conflict, so a screen can be tested
+ * with the backend's own wording (POST /inventory/load: a slot filled by someone else meanwhile).
+ */
+const CONTRACT_CONFLICTS: Record<string, string> = { '/inventory/load': 'Slot capacity exceeded' }
+
+function requestUrl(input: RequestInfo | URL): URL {
+  const raw = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
+  return new URL(raw, 'http://mock.invalid') // base URL is irrelevant: only the path and query matter
+}
+
+function wait(ms: number, signal?: AbortSignal | null): Promise<void> {
+  signal?.throwIfAborted()
+  if (ms <= 0) return Promise.resolve()
+  return new Promise((resolve, reject) => {
+    const onAbort = () => { clearTimeout(timer); reject(signal!.reason) }
+    const timer = setTimeout(() => { signal?.removeEventListener('abort', onAbort); resolve() }, ms)
+    signal?.addEventListener('abort', onAbort, { once: true })
+  })
+}
+
+/**
+ * multipart/form-data (the public customer report): plain fields as strings, file parts as { name, type, size, bytes }
+ * (the mock checks magic bytes and dimensions like the backend). A repeated part (`photos`) becomes an array.
+ */
+async function parseBody(init?: RequestInit): Promise<unknown> {
+  if (typeof FormData !== 'undefined' && init?.body instanceof FormData) {
+    const parts: Record<string, unknown> = {}
+    for (const [key, value] of init.body.entries()) {
+      const part = typeof value === 'string' ? value : { name: value.name, type: value.type, size: value.size, bytes: new Uint8Array(await value.arrayBuffer()) }
+      const previous = parts[key]
+      parts[key] = previous === undefined ? part : Array.isArray(previous) ? [...previous, part] : [previous, part]
+    }
+    return parts
+  }
+  if (typeof init?.body !== 'string') return undefined
+  try { return JSON.parse(init.body) } catch { throw new MockHttpError(400, 'Nội dung yêu cầu không phải JSON hợp lệ.') }
+}
+
+/** Per-field errors for a simulated 400, keyed on the first submitted field so forms can show them. */
+function simulatedFieldErrors(body: unknown): Record<string, string> | undefined {
+  const field = body && typeof body === 'object' ? Object.keys(body)[0] : undefined
+  return field ? { [field]: 'Giá trị không hợp lệ (mô phỏng).' } : undefined
+}
+
+interface TokenClaims { sub?: unknown; email?: unknown; roles?: unknown; exp?: unknown; iat?: unknown; iatMs?: unknown }
+
+function decodeClaims(token: string): TokenClaims | null {
+  try {
+    const payload = (token.split('.')[1] ?? '').replace(/-/g, '+').replace(/_/g, '/')
+    return JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(payload), char => char.charCodeAt(0))))
+  } catch { return null }
+}
+
+/** Empties list payloads only; single records (detail pages, kiosk identity) are unaffected. */
+function emptied(data: unknown): unknown {
+  if (Array.isArray(data)) return []
+  if (data && typeof data === 'object') {
+    if ('content' in data) return { ...data, content: [], totalElements: 0, totalPages: 0 }
+    if ('products' in data) return { ...data, products: [] }
+    // Dashboard (#76): nothing needs attention, no machine listed; money blocks (when present) at zero.
+    if ('machinesDetail' in data) {
+      const zeros = (block: unknown) => block && typeof block === 'object' ? Object.fromEntries(Object.keys(block).map(key => [key, key === 'date' ? (block as Record<string, unknown>)[key] : 0])) : block
+      const dashboard = data as Record<string, unknown>
+      return Object.fromEntries(Object.entries(dashboard).map(([key, value]) => [key, key === 'machinesDetail' ? [] : key === 'generatedAt' ? value : zeros(value)]))
+    }
+  }
+  return data
+}
+
+/** Mock-only controls for tests and demos (never in a production build: this module is only loaded with VITE_API_MOCK). */
+export interface MockControl {
+  raiseAlert: (input?: RaiseAlertInput) => MockAlert
+  /** The machine (id or code) sends a last message now, then goes silent; returns that lastSeenAt. */
+  stopHeartbeat: (machine: string) => string | null
+  resumeHeartbeat: (machine: string) => string | null
+  /** Mocked requests so far whose path (without /api/v1) starts with `prefix`, with the mock time they arrived. */
+  requests: (prefix?: string) => { method: string; path: string; at: number }[]
+  /** Plays a verified payment webhook for the newest kiosk order showing a QR; returns its order code or null. */
+  payKioskOrder: () => string | null
+  /** An administrator elsewhere changes a machine's status (id or code), e.g. to MAINTENANCE before a restock (FE 7.2). */
+  setMachineStatus: (machine: string, status: 'ACTIVE' | 'INACTIVE' | 'MAINTENANCE') => void
+}
+export type MockFetcher = typeof fetch & { control: MockControl }
+/** Kept for the FM5 kiosk tests: `window.__freshvendMock`. */
+export type MockControls = Pick<MockControl, 'payKioskOrder'>
+
+function kioskSimulation(options: MockOptions, scenario: Scenario | null): KioskSimulation {
+  const name = scenario?.name
+  return {
+    autoPayMs: options.autoPayMs, dispenseMs: options.dispenseMs, autoPay: name !== 'pending', maintenance: name === 'maintenance',
+    dispense: name === 'dispense-failed' ? 'fail' : name === 'dispense-slow' ? 'slow' : 'ok',
+  }
+}
+
+export function createMockFetcher(selection: MockSelection, overrides: Partial<MockOptions> = {}): MockFetcher {
+  const options: MockOptions = {
+    realFetch: (...args) => fetch(...args), getSearch: () => '', storage: null, latencyMs: 0, slowMs: 3000, now: () => Date.now(), autoPayMs: 15_000, dispenseMs: 4_000, ...overrides,
+  }
+  const store = createStore(options.now())
+  const enabledGroups = new Set<string>(selection.groups)
+  const expiry = { since: null as number | null }
+  /** Set per request by the `expire` scenario: tokens issued before this instant are treated as expired. */
+  let expiredBefore: number | null = null
+
+  // Sign-in goes to the real backend when `auth` is not mocked (for example VITE_API_MOCK=roles): its tokens name
+  // accounts the mock store does not have.
+  const realSignIn = !selection.all && !enabledGroups.has('auth')
+
+  /**
+   * With a real sign-in, a token whose `sub` is not in the mock store is served as a stand-in account built from its
+   * own claims (id, email, `roles` such as ROLE_ADMIN), so mocking one group does not sign the user out. The stand-in is
+   * not added to the store; the role table of the mock still decides its permissions. Expiry is checked as usual.
+   */
+  function standIn(claims: TokenClaims | null): MockUser | undefined {
+    if (!realSignIn || typeof claims?.sub !== 'string' || !claims.sub || !Array.isArray(claims.roles)) return undefined
+    const roles = claims.roles.filter((role): role is string => typeof role === 'string').map(role => role.replace(/^ROLE_/, ''))
+    const email = typeof claims.email === 'string' ? claims.email : ''
+    const at = new Date(options.now()).toISOString()
+    return { id: claims.sub, email, fullName: email || 'Tài khoản đăng nhập thật', phone: null, status: 'ACTIVE', roles, password: '', createdAt: at, updatedAt: at }
+  }
+
+  function authenticate(policy: Exclude<Policy, 'public' | 'kiosk'>, authorization: string | null): MockUser {
+    const token = authorization?.replace(/^Bearer\s+/i, '')
+    const claims = token ? decodeClaims(token) : null
+    const user = store.users.find(candidate => candidate.id === claims?.sub) ?? standIn(claims)
+    const issuedAt = typeof claims?.iatMs === 'number' ? claims.iatMs : typeof claims?.iat === 'number' ? claims.iat * 1000 : 0
+    if (!user || user.status !== 'ACTIVE' || typeof claims?.exp !== 'number' || claims.exp * 1000 <= options.now() || (expiredBefore !== null && issuedAt < expiredBefore)) {
+      throw new MockHttpError(401, 'Authentication required or access token invalid')
+    }
+    if (policy === 'admin' && !user.roles.includes('ADMIN')) throw new MockHttpError(403, 'Access denied')
+    // Backend #48: permissions are read from the role table on every request, so a change applies to the next call.
+    if (typeof policy === 'object' && 'permission' in policy && !permissionsOfUser(store, user).includes(policy.permission)) throw new MockHttpError(403, 'Access denied')
+    return user
+  }
+
+  function kioskMachineId(key: string | null): string {
+    const credential = key ? store.credentials.find(candidate => candidate.apiKey === key) : undefined
+    if (!key || credential?.status === 'REVOKED') throw new MockHttpError(401, 'Authentication required or access token invalid')
+    // Any other key is accepted as the first machine, so the mock works with whatever VITE_KIOSK_API_KEY is configured.
+    return credential?.machineId ?? store.machines[0].id
+  }
+
+  function dispatch(method: string, path: string, query: URLSearchParams, headers: Headers, body: unknown, simulation: KioskSimulation): Reply {
+    for (const route of routes) {
+      if (route.method !== method) continue
+      const match = route.pattern.exec(path)
+      if (!match) continue
+      const ctx: HandlerContext = { store, now: options.now(), params: match.groups ?? {}, query, body, user: undefined, machineId: '', options: simulation, headers }
+      if (route.policy === 'kiosk') ctx.machineId = kioskMachineId(headers.get('x-kiosk-key'))
+      else if (route.policy !== 'public') ctx.user = authenticate(route.policy, headers.get('authorization'))
+      advanceOrders(ctx)
+      advanceMaintenanceCommands(ctx)
+      syncHeartbeats(store, ctx.now)
+      return route.handle(ctx)
+    }
+    throw new MockHttpError(501, `Mock chưa có handler cho ${method} ${API_PREFIX}${path}`)
+  }
+
+  /** Last mocked requests (at most 500), for tests that must prove how many polls happened. */
+  const requestLog: { method: string; path: string; at: number }[] = []
+  const control: MockControl = {
+    payKioskOrder: () => payLatestKioskOrder({
+      store, now: options.now(), params: {}, query: new URLSearchParams(), body: undefined, user: undefined, machineId: '',
+      options: kioskSimulation(options, readScenario(options.getSearch(), options.storage)),
+    }),
+    requests: (prefix = '') => requestLog.filter(entry => entry.path.startsWith(prefix)).map(entry => ({ ...entry })),
+    raiseAlert: input => raiseAlert(store, options.now(), input),
+    stopHeartbeat: machine => setHeartbeat(store, options.now(), machine, false),
+    resumeHeartbeat: machine => setHeartbeat(store, options.now(), machine, true),
+    setMachineStatus: (machine, status) => {
+      const target = store.machines.find(candidate => candidate.id === machine || candidate.code === machine)
+      if (!target) throw new Error(`Không có máy ${machine}`)
+      Object.assign(target, { status, updatedAt: new Date(options.now()).toISOString() })
+    },
+  }
+  const fetcher: typeof fetch = async (input, init) => {
+    const url = requestUrl(input)
+    const path = url.pathname.startsWith(`${API_PREFIX}/`) ? url.pathname.slice(API_PREFIX.length) : url.pathname
+    const fullPath = url.pathname
+    const group = groupOf(path)
+    if (!selection.all && !(group && enabledGroups.has(group))) return options.realFetch(input, init)
+
+    const method = (init?.method ?? 'GET').toUpperCase()
+    requestLog.push({ method, path, at: options.now() })
+    if (requestLog.length > 500) requestLog.shift()
+    const signal = init?.signal
+    await wait(options.latencyMs, signal)
+    const current = readScenario(options.getSearch(), options.storage)
+    const scenario = current && scenarioApplies(current, method, path, group) ? current : null
+    const since = expireSince(current, options.storage, options.now(), expiry)
+    expiredBefore = scenario ? since : null
+    if (scenario?.name === 'slow') await wait(options.slowMs, signal)
+    if (scenario?.name === 'network') throw new TypeError('Failed to fetch')
+
+    const now = options.now()
+    try {
+      const body = await parseBody(init)
+      const simulated = scenario ? SCENARIO_ERRORS[scenario.name] : undefined
+      if (simulated) {
+        // Like GlobalExceptionHandler: only validation (400) carries fieldErrors; handleConflict (409) sends the message alone.
+        const fields = simulated.status === 400 ? simulatedFieldErrors(body) : undefined
+        const message = simulated.status === 409 ? CONTRACT_CONFLICTS[path] ?? simulated.message : simulated.message
+        return errorResponse(simulated.status, message, fullPath, now, fields)
+      }
+      const reply = dispatch(method, path, url.searchParams, new Headers(init?.headers), body, kioskSimulation(options, current))
+      return successResponse(scenario?.name === 'empty' && method === 'GET' ? { ...reply, data: emptied(reply.data) } : reply, now)
+    } catch (error) {
+      if (error instanceof MockHttpError) return errorResponse(error.status, error.message, fullPath, now, error.fieldErrors, error.headers)
+      console.error('[mock] handler failed', error)
+      return errorResponse(500, 'An unexpected error occurred', fullPath, now)
+    }
+  }
+  return Object.assign(fetcher, { control })
+}

@@ -1,0 +1,122 @@
+// Management web routes. Each route and nav item names the permission it needs; who holds which permission is
+// decided only in permissions.ts. Pure data so it can be unit-tested; the backend still enforces every call.
+import type { Role } from '../api/session.ts'
+import { can, rolesWith } from './permissions.ts'
+import type { Permission, Subject } from './permissions.ts'
+
+export type PageKey =
+  | 'overview' | 'users' | 'products' | 'machines' | 'machine-detail' | 'batches' | 'inventory' | 'inventory-history'
+  | 'orders' | 'order-detail' | 'payments' | 'payment-detail' | 'webhook-logs' | 'webhook-log-detail' | 'roles'
+  | 'alerts' | 'alert-detail' | 'tickets' | 'ticket-detail' | 'ticket-restock' | 'maintenance-schedules' | 'refunds'
+  | 'revenue-report' | 'customer-reports' | 'customer-report-detail'
+
+/** `roles` lists the roles that hold `permission` today (derived, for display and older callers). */
+export interface RouteMatch { page: PageKey; id?: string; permission: Permission; roles: readonly Role[] }
+
+const ROUTES: { pattern: RegExp; page: PageKey; permission: Permission }[] = [
+  // O1 (FE 6.5 + 9.2): GET /dashboard/overview of backend #76, DASHBOARD_READ (ADMIN, STAFF).
+  { pattern: /^\/admin\/overview$/, page: 'overview', permission: 'DASHBOARD_READ' },
+  { pattern: /^\/admin\/users$/, page: 'users', permission: 'USER_READ' },
+  { pattern: /^\/admin\/roles$/, page: 'roles', permission: 'PERMISSION_MANAGE' },
+  { pattern: /^\/admin\/products$/, page: 'products', permission: 'PRODUCT_READ' },
+  { pattern: /^\/admin\/machines$/, page: 'machines', permission: 'MACHINE_READ' },
+  { pattern: /^\/admin\/machines\/([^/]+)$/, page: 'machine-detail', permission: 'MACHINE_READ' },
+  { pattern: /^\/admin\/batches$/, page: 'batches', permission: 'BATCH_READ' },
+  { pattern: /^\/admin\/inventory$/, page: 'inventory', permission: 'INVENTORY_READ' },
+  { pattern: /^\/admin\/inventory\/history$/, page: 'inventory-history', permission: 'INVENTORY_READ' },
+  { pattern: /^\/admin\/alerts$/, page: 'alerts', permission: 'ALERT_READ' },
+  { pattern: /^\/admin\/alerts\/([^/]+)$/, page: 'alert-detail', permission: 'ALERT_READ' },
+  // O3 (FE 7.1): /work-orders of api.yaml (backend #66); without WORK_ORDER_READ_ALL only the caller's own work orders.
+  { pattern: /^\/admin\/tickets$/, page: 'tickets', permission: 'WORK_ORDER_READ_ASSIGNED' },
+  { pattern: /^\/admin\/tickets\/([^/]+)$/, page: 'ticket-detail', permission: 'WORK_ORDER_READ_ASSIGNED' },
+  // O4 (FE 7.2): carrying out a RESTOCK ticket on a phone; the server only discloses the ticket to its assignee/admins.
+  { pattern: /^\/admin\/tickets\/([^/]+)\/restock$/, page: 'ticket-restock', permission: 'WORK_ORDER_READ_ASSIGNED' },
+  // Customer reports (backend #74): STAFF only sees the reports of their own work orders (server-side, 404 otherwise).
+  { pattern: /^\/admin\/customer-reports$/, page: 'customer-reports', permission: 'CUSTOMER_REPORT_READ' },
+  { pattern: /^\/admin\/customer-reports\/([^/]+)$/, page: 'customer-report-detail', permission: 'CUSTOMER_REPORT_READ' },
+  // O5 (FE 7.3): /maintenance-plans of api.yaml (backend #70); changes need MAINTENANCE_PLAN_MANAGE.
+  { pattern: /^\/admin\/maintenance-schedules$/, page: 'maintenance-schedules', permission: 'MAINTENANCE_PLAN_READ' },
+  { pattern: /^\/admin\/orders$/, page: 'orders', permission: 'ORDER_READ' },
+  { pattern: /^\/admin\/orders\/([^/]+)$/, page: 'order-detail', permission: 'ORDER_READ' },
+  { pattern: /^\/admin\/payments$/, page: 'payments', permission: 'PAYMENT_READ' },
+  { pattern: /^\/admin\/payments\/([^/]+)$/, page: 'payment-detail', permission: 'PAYMENT_READ' },
+  // T3 / W-12 (FE 8.1): refunds of backend #72, REFUND_READ (ADMIN only); recording needs PAYMENT_REFUND.
+  { pattern: /^\/admin\/refunds$/, page: 'refunds', permission: 'REFUND_READ' },
+  { pattern: /^\/admin\/webhook-logs$/, page: 'webhook-logs', permission: 'PAYMENT_WEBHOOK_LOG_READ' },
+  { pattern: /^\/admin\/webhook-logs\/([^/]+)$/, page: 'webhook-log-detail', permission: 'PAYMENT_WEBHOOK_LOG_READ' },
+  // R1 (FE 9.1): sales reports of backend #76, REPORT_SALES_READ (ADMIN); exporting needs REPORT_EXPORT.
+  { pattern: /^\/admin\/reports\/revenue$/, page: 'revenue-report', permission: 'REPORT_SALES_READ' },
+]
+
+export function matchRoute(pathname: string): RouteMatch | undefined {
+  const path = pathname.replace(/\/+$/, '') || '/'
+  for (const route of ROUTES) {
+    const match = route.pattern.exec(path)
+    if (match) return { page: route.page, id: match[1] ? decodeURIComponent(match[1]) : undefined, permission: route.permission, roles: rolesWith(route.permission) }
+  }
+  return undefined
+}
+
+export type NavGroup = 'Vận hành' | 'Giao dịch' | 'Hệ thống'
+export interface NavItem { to: string; label: string; group: NavGroup; permission: Permission; match: PageKey[] }
+
+export const NAV: NavItem[] = [
+  // First item: the landing screen after sign-in for everyone holding DASHBOARD_READ (homeFor).
+  { to: '/admin/overview', label: 'Tổng quan', group: 'Vận hành', permission: 'DASHBOARD_READ', match: ['overview'] },
+  { to: '/admin/machines', label: 'Máy bán hàng', group: 'Vận hành', permission: 'MACHINE_READ', match: ['machines', 'machine-detail'] },
+  { to: '/admin/products', label: 'Sản phẩm', group: 'Vận hành', permission: 'PRODUCT_READ', match: ['products'] },
+  { to: '/admin/batches', label: 'Lô hàng', group: 'Vận hành', permission: 'BATCH_READ', match: ['batches'] },
+  { to: '/admin/inventory', label: 'Tồn kho', group: 'Vận hành', permission: 'INVENTORY_READ', match: ['inventory', 'inventory-history'] },
+  // ALERT_READ of api.yaml (backend #58, V17).
+  { to: '/admin/alerts', label: 'Cảnh báo', group: 'Vận hành', permission: 'ALERT_READ', match: ['alerts', 'alert-detail'] },
+  // Work orders of backend #66.
+  { to: '/admin/tickets', label: 'Phiếu công việc', group: 'Vận hành', permission: 'WORK_ORDER_READ_ASSIGNED', match: ['tickets', 'ticket-detail', 'ticket-restock'] },
+  // Customer reports of backend #74 (ADMIN all, STAFF those of their work orders).
+  { to: '/admin/customer-reports', label: 'Phản ánh của khách', group: 'Vận hành', permission: 'CUSTOMER_REPORT_READ', match: ['customer-reports', 'customer-report-detail'] },
+  // Maintenance plans of backend #70.
+  { to: '/admin/maintenance-schedules', label: 'Lịch bảo trì', group: 'Vận hành', permission: 'MAINTENANCE_PLAN_READ', match: ['maintenance-schedules'] },
+  { to: '/admin/orders', label: 'Đơn hàng', group: 'Giao dịch', permission: 'ORDER_READ', match: ['orders', 'order-detail'] },
+  { to: '/admin/payments', label: 'Thanh toán', group: 'Giao dịch', permission: 'PAYMENT_READ', match: ['payments', 'payment-detail'] },
+  // Refunds of backend #72, ADMIN only.
+  { to: '/admin/refunds', label: 'Hoàn tiền', group: 'Giao dịch', permission: 'REFUND_READ', match: ['refunds'] },
+  { to: '/admin/webhook-logs', label: 'Webhook thanh toán', group: 'Giao dịch', permission: 'PAYMENT_WEBHOOK_LOG_READ', match: ['webhook-logs', 'webhook-log-detail'] },
+  // Sales reports of backend #76, ADMIN only.
+  { to: '/admin/reports/revenue', label: 'Báo cáo doanh thu', group: 'Giao dịch', permission: 'REPORT_SALES_READ', match: ['revenue-report'] },
+  { to: '/admin/users', label: 'Tài khoản', group: 'Hệ thống', permission: 'USER_READ', match: ['users'] },
+  { to: '/admin/roles', label: 'Vai trò & quyền', group: 'Hệ thống', permission: 'PERMISSION_MANAGE', match: ['roles'] },
+]
+
+/** Breadcrumb trail for a route: group, section (linked) and, on detail screens, the record level. */
+export function breadcrumbFor(route: RouteMatch | undefined): { label: string; to?: string }[] {
+  if (!route) return []
+  const item = NAV.find(entry => entry.match.includes(route.page))
+  if (!item) return []
+  const detail = route.page === 'inventory-history' ? 'Lịch sử' : route.page === 'ticket-restock' ? 'Thực hiện nạp hàng' : route.id ? 'Chi tiết' : undefined
+  return [{ label: item.group }, { label: item.label, to: detail ? item.to : undefined }, ...(detail ? [{ label: detail }] : [])]
+}
+
+/** Whether the user's roles include one of `required` (kept for older callers; prefer `canOpen`). */
+export function canAccess(userRoles: readonly Role[], required: readonly Role[]): boolean {
+  return required.some(role => userRoles.includes(role))
+}
+/** Route guard: decided before the screen mounts, so a forbidden screen never calls the API. */
+export function canOpen(subject: Subject | readonly Role[], route: Pick<RouteMatch, 'permission'>): boolean {
+  return can(subject, route.permission)
+}
+export function navFor(subject: Subject | readonly Role[]): NavItem[] {
+  return NAV.filter(item => can(subject, item.permission))
+}
+/**
+ * Where to go after signing in: back to `next` (already checked by safeNext) when this account may open it, otherwise
+ * the account's own first screen. Someone else's expired session must not drop a STAFF account on a 403 page.
+ * Paths without a route (/admin, /staff, unknown screens) are kept: AdminApp redirects or explains them.
+ */
+export function landingFor(subject: Subject | readonly Role[], next: string | null): string {
+  if (!next) return homeFor(subject)
+  const route = matchRoute(new URL(next, 'https://web.invalid').pathname)
+  return route && !canOpen(subject, route) ? homeFor(subject) : next
+}
+/** Landing route after login or when visiting /admin. */
+export function homeFor(subject: Subject | readonly Role[]): string {
+  return navFor(subject)[0]?.to ?? '/login'
+}

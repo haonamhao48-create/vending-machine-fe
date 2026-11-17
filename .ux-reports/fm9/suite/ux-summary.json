@@ -1,0 +1,1041 @@
+{
+  "generatedAt": "2026-11-13T08:38:18.545Z",
+  "screenshots": [
+    {
+      "screen": "forbidden",
+      "viewport": "1440",
+      "theme": "dark",
+      "file": "screenshots/forbidden-1440-dark.png"
+    },
+    {
+      "screen": "forbidden",
+      "viewport": "1440",
+      "theme": "light",
+      "file": "screenshots/forbidden-1440-light.png"
+    },
+    {
+      "screen": "forbidden",
+      "viewport": "768",
+      "theme": "dark",
+      "file": "screenshots/forbidden-768-dark.png"
+    },
+    {
+      "screen": "forbidden",
+      "viewport": "768",
+      "theme": "light",
+      "file": "screenshots/forbidden-768-light.png"
+    },
+    {
+      "screen": "forbidden",
+      "viewport": "390",
+      "theme": "dark",
+      "file": "screenshots/forbidden-390-dark.png"
+    },
+    {
+      "screen": "forbidden",
+      "viewport": "390",
+      "theme": "light",
+      "file": "screenshots/forbidden-390-light.png"
+    },
+    {
+      "screen": "kiosk-cancelled",
+      "viewport": "1280x800",
+      "theme": "light",
+      "file": "screenshots/kiosk-cancelled-1280x800-light.png"
+    },
+    {
+      "screen": "kiosk-catalog",
+      "viewport": "1280x800",
+      "theme": "light",
+      "file": "screenshots/kiosk-catalog-1280x800-light.png"
+    },
+    {
+      "screen": "kiosk-dispense-failed",
+      "viewport": "1280x800",
+      "theme": "light",
+      "file": "screenshots/kiosk-dispense-failed-1280x800-light.png"
+    },
+    {
+      "screen": "kiosk-dispensing",
+      "viewport": "1280x800",
+      "theme": "light",
+      "file": "screenshots/kiosk-dispensing-1280x800-light.png"
+    },
+    {
+      "screen": "kiosk-expired",
+      "viewport": "1280x800",
+      "theme": "light",
+      "file": "screenshots/kiosk-expired-1280x800-light.png"
+    },
+    {
+      "screen": "kiosk-incident",
+      "viewport": "1280x800",
+      "theme": "light",
+      "file": "screenshots/kiosk-incident-1280x800-light.png"
+    },
+    {
+      "screen": "kiosk-maintenance",
+      "viewport": "1280x800",
+      "theme": "light",
+      "file": "screenshots/kiosk-maintenance-1280x800-light.png"
+    },
+    {
+      "screen": "kiosk-offline",
+      "viewport": "1280x800",
+      "theme": "light",
+      "file": "screenshots/kiosk-offline-1280x800-light.png"
+    },
+    {
+      "screen": "kiosk-payment",
+      "viewport": "1280x800",
+      "theme": "light",
+      "file": "screenshots/kiosk-payment-1280x800-light.png"
+    },
+    {
+      "screen": "kiosk-sold-out",
+      "viewport": "1280x800",
+      "theme": "light",
+      "file": "screenshots/kiosk-sold-out-1280x800-light.png"
+    },
+    {
+      "screen": "kiosk-thanks",
+      "viewport": "1280x800",
+      "theme": "light",
+      "file": "screenshots/kiosk-thanks-1280x800-light.png"
+    },
+    {
+      "screen": "kiosk-unconfigured",
+      "viewport": "1280x800",
+      "theme": "light",
+      "file": "screenshots/kiosk-unconfigured-1280x800-light.png"
+    },
+    {
+      "screen": "kit",
+      "viewport": "1440",
+      "theme": "dark",
+      "file": "screenshots/kit-1440-dark.png"
+    },
+    {
+      "screen": "kit",
+      "viewport": "1440",
+      "theme": "light",
+      "file": "screenshots/kit-1440-light.png"
+    },
+    {
+      "screen": "kit",
+      "viewport": "768",
+      "theme": "dark",
+      "file": "screenshots/kit-768-dark.png"
+    },
+    {
+      "screen": "kit",
+      "viewport": "768",
+      "theme": "light",
+      "file": "screenshots/kit-768-light.png"
+    },
+    {
+      "screen": "kit",
+      "viewport": "390",
+      "theme": "dark",
+      "file": "screenshots/kit-390-dark.png"
+    },
+    {
+      "screen": "kit",
+      "viewport": "390",
+      "theme": "light",
+      "file": "screenshots/kit-390-light.png"
+    },
+    {
+      "screen": "login",
+      "viewport": "1440",
+      "theme": "dark",
+      "file": "screenshots/login-1440-dark.png"
+    },
+    {
+      "screen": "login",
+      "viewport": "1440",
+      "theme": "dark",
+      "file": "screenshots/login-1440-dark.png"
+    },
+    {
+      "screen": "login",
+      "viewport": "1440",
+      "theme": "light",
+      "file": "screenshots/login-1440-light.png"
+    },
+    {
+      "screen": "login",
+      "viewport": "1440",
+      "theme": "light",
+      "file": "screenshots/login-1440-light.png"
+    },
+    {
+      "screen": "login",
+      "viewport": "768",
+      "theme": "dark",
+      "file": "screenshots/login-768-dark.png"
+    },
+    {
+      "screen": "login",
+      "viewport": "768",
+      "theme": "dark",
+      "file": "screenshots/login-768-dark.png"
+    },
+    {
+      "screen": "login",
+      "viewport": "768",
+      "theme": "light",
+      "file": "screenshots/login-768-light.png"
+    },
+    {
+      "screen": "login",
+      "viewport": "768",
+      "theme": "light",
+      "file": "screenshots/login-768-light.png"
+    },
+    {
+      "screen": "login",
+      "viewport": "390",
+      "theme": "dark",
+      "file": "screenshots/login-390-dark.png"
+    },
+    {
+      "screen": "login",
+      "viewport": "390",
+      "theme": "dark",
+      "file": "screenshots/login-390-dark.png"
+    },
+    {
+      "screen": "login",
+      "viewport": "390",
+      "theme": "light",
+      "file": "screenshots/login-390-light.png"
+    },
+    {
+      "screen": "login",
+      "viewport": "390",
+      "theme": "light",
+      "file": "screenshots/login-390-light.png"
+    },
+    {
+      "screen": "orders",
+      "viewport": "1440",
+      "theme": "dark",
+      "file": "screenshots/orders-1440-dark.png"
+    },
+    {
+      "screen": "orders",
+      "viewport": "1440",
+      "theme": "light",
+      "file": "screenshots/orders-1440-light.png"
+    },
+    {
+      "screen": "orders",
+      "viewport": "1440",
+      "theme": "light",
+      "file": "screenshots/orders-1440-light.png"
+    },
+    {
+      "screen": "orders",
+      "viewport": "768",
+      "theme": "dark",
+      "file": "screenshots/orders-768-dark.png"
+    },
+    {
+      "screen": "orders",
+      "viewport": "768",
+      "theme": "light",
+      "file": "screenshots/orders-768-light.png"
+    },
+    {
+      "screen": "orders",
+      "viewport": "390",
+      "theme": "dark",
+      "file": "screenshots/orders-390-dark.png"
+    },
+    {
+      "screen": "orders",
+      "viewport": "390",
+      "theme": "light",
+      "file": "screenshots/orders-390-light.png"
+    },
+    {
+      "screen": "overview",
+      "viewport": "1440",
+      "theme": "dark",
+      "file": "screenshots/overview-1440-dark.png"
+    },
+    {
+      "screen": "overview",
+      "viewport": "1440",
+      "theme": "light",
+      "file": "screenshots/overview-1440-light.png"
+    },
+    {
+      "screen": "overview",
+      "viewport": "768",
+      "theme": "dark",
+      "file": "screenshots/overview-768-dark.png"
+    },
+    {
+      "screen": "overview",
+      "viewport": "768",
+      "theme": "light",
+      "file": "screenshots/overview-768-light.png"
+    },
+    {
+      "screen": "overview",
+      "viewport": "390",
+      "theme": "dark",
+      "file": "screenshots/overview-390-dark.png"
+    },
+    {
+      "screen": "overview",
+      "viewport": "390",
+      "theme": "light",
+      "file": "screenshots/overview-390-light.png"
+    },
+    {
+      "screen": "overview-empty",
+      "viewport": "390",
+      "theme": "dark",
+      "file": "screenshots/overview-empty-390-dark.png"
+    },
+    {
+      "screen": "overview-empty",
+      "viewport": "390",
+      "theme": "light",
+      "file": "screenshots/overview-empty-390-light.png"
+    },
+    {
+      "screen": "refunds-dialog",
+      "viewport": "1440",
+      "theme": "dark",
+      "file": "screenshots/refunds-dialog-1440-dark.png"
+    },
+    {
+      "screen": "refunds-dialog",
+      "viewport": "1440",
+      "theme": "light",
+      "file": "screenshots/refunds-dialog-1440-light.png"
+    },
+    {
+      "screen": "refunds-dialog",
+      "viewport": "768",
+      "theme": "dark",
+      "file": "screenshots/refunds-dialog-768-dark.png"
+    },
+    {
+      "screen": "refunds-dialog",
+      "viewport": "768",
+      "theme": "light",
+      "file": "screenshots/refunds-dialog-768-light.png"
+    },
+    {
+      "screen": "refunds-dialog",
+      "viewport": "390",
+      "theme": "dark",
+      "file": "screenshots/refunds-dialog-390-dark.png"
+    },
+    {
+      "screen": "refunds-dialog",
+      "viewport": "390",
+      "theme": "light",
+      "file": "screenshots/refunds-dialog-390-light.png"
+    },
+    {
+      "screen": "refunds-pending",
+      "viewport": "1440",
+      "theme": "dark",
+      "file": "screenshots/refunds-pending-1440-dark.png"
+    },
+    {
+      "screen": "refunds-pending",
+      "viewport": "1440",
+      "theme": "light",
+      "file": "screenshots/refunds-pending-1440-light.png"
+    },
+    {
+      "screen": "refunds-pending",
+      "viewport": "768",
+      "theme": "dark",
+      "file": "screenshots/refunds-pending-768-dark.png"
+    },
+    {
+      "screen": "refunds-pending",
+      "viewport": "768",
+      "theme": "light",
+      "file": "screenshots/refunds-pending-768-light.png"
+    },
+    {
+      "screen": "refunds-pending",
+      "viewport": "390",
+      "theme": "dark",
+      "file": "screenshots/refunds-pending-390-dark.png"
+    },
+    {
+      "screen": "refunds-pending",
+      "viewport": "390",
+      "theme": "light",
+      "file": "screenshots/refunds-pending-390-light.png"
+    },
+    {
+      "screen": "refunds-refunded",
+      "viewport": "1440",
+      "theme": "dark",
+      "file": "screenshots/refunds-refunded-1440-dark.png"
+    },
+    {
+      "screen": "refunds-refunded",
+      "viewport": "1440",
+      "theme": "light",
+      "file": "screenshots/refunds-refunded-1440-light.png"
+    },
+    {
+      "screen": "refunds-refunded",
+      "viewport": "768",
+      "theme": "dark",
+      "file": "screenshots/refunds-refunded-768-dark.png"
+    },
+    {
+      "screen": "refunds-refunded",
+      "viewport": "768",
+      "theme": "light",
+      "file": "screenshots/refunds-refunded-768-light.png"
+    },
+    {
+      "screen": "refunds-refunded",
+      "viewport": "390",
+      "theme": "dark",
+      "file": "screenshots/refunds-refunded-390-dark.png"
+    },
+    {
+      "screen": "refunds-refunded",
+      "viewport": "390",
+      "theme": "light",
+      "file": "screenshots/refunds-refunded-390-light.png"
+    },
+    {
+      "screen": "users",
+      "viewport": "768",
+      "theme": "dark",
+      "file": "screenshots/users-768-dark.png"
+    },
+    {
+      "screen": "users",
+      "viewport": "768",
+      "theme": "light",
+      "file": "screenshots/users-768-light.png"
+    },
+    {
+      "screen": "users",
+      "viewport": "390",
+      "theme": "dark",
+      "file": "screenshots/users-390-dark.png"
+    },
+    {
+      "screen": "users",
+      "viewport": "390",
+      "theme": "light",
+      "file": "screenshots/users-390-light.png"
+    }
+  ],
+  "overflow": [
+    {
+      "screen": "forbidden",
+      "viewport": "1440",
+      "theme": "dark",
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "ok": true
+    },
+    {
+      "screen": "forbidden",
+      "viewport": "1440",
+      "theme": "light",
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "ok": true
+    },
+    {
+      "screen": "forbidden",
+      "viewport": "768",
+      "theme": "dark",
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "ok": true
+    },
+    {
+      "screen": "forbidden",
+      "viewport": "768",
+      "theme": "light",
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "ok": true
+    },
+    {
+      "screen": "forbidden",
+      "viewport": "390",
+      "theme": "dark",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "ok": true
+    },
+    {
+      "screen": "forbidden",
+      "viewport": "390",
+      "theme": "light",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "ok": true
+    },
+    {
+      "screen": "kiosk-cancelled",
+      "viewport": "1280x800",
+      "theme": "light",
+      "scrollWidth": 1280,
+      "clientWidth": 1280,
+      "ok": true
+    },
+    {
+      "screen": "kiosk-catalog",
+      "viewport": "1280x800",
+      "theme": "light",
+      "scrollWidth": 1280,
+      "clientWidth": 1280,
+      "ok": true
+    },
+    {
+      "screen": "kiosk-dispense-failed",
+      "viewport": "1280x800",
+      "theme": "light",
+      "scrollWidth": 1280,
+      "clientWidth": 1280,
+      "ok": true
+    },
+    {
+      "screen": "kiosk-dispensing",
+      "viewport": "1280x800",
+      "theme": "light",
+      "scrollWidth": 1280,
+      "clientWidth": 1280,
+      "ok": true
+    },
+    {
+      "screen": "kiosk-expired",
+      "viewport": "1280x800",
+      "theme": "light",
+      "scrollWidth": 1280,
+      "clientWidth": 1280,
+      "ok": true
+    },
+    {
+      "screen": "kiosk-incident",
+      "viewport": "1280x800",
+      "theme": "light",
+      "scrollWidth": 1280,
+      "clientWidth": 1280,
+      "ok": true
+    },
+    {
+      "screen": "kiosk-maintenance",
+      "viewport": "1280x800",
+      "theme": "light",
+      "scrollWidth": 1280,
+      "clientWidth": 1280,
+      "ok": true
+    },
+    {
+      "screen": "kiosk-offline",
+      "viewport": "1280x800",
+      "theme": "light",
+      "scrollWidth": 1280,
+      "clientWidth": 1280,
+      "ok": true
+    },
+    {
+      "screen": "kiosk-payment",
+      "viewport": "1280x800",
+      "theme": "light",
+      "scrollWidth": 1280,
+      "clientWidth": 1280,
+      "ok": true
+    },
+    {
+      "screen": "kiosk-sold-out",
+      "viewport": "1280x800",
+      "theme": "light",
+      "scrollWidth": 1280,
+      "clientWidth": 1280,
+      "ok": true
+    },
+    {
+      "screen": "kiosk-thanks",
+      "viewport": "1280x800",
+      "theme": "light",
+      "scrollWidth": 1280,
+      "clientWidth": 1280,
+      "ok": true
+    },
+    {
+      "screen": "kiosk-unconfigured",
+      "viewport": "1280x800",
+      "theme": "light",
+      "scrollWidth": 1280,
+      "clientWidth": 1280,
+      "ok": true
+    },
+    {
+      "screen": "kit",
+      "viewport": "1440",
+      "theme": "dark",
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "ok": true
+    },
+    {
+      "screen": "kit",
+      "viewport": "1440",
+      "theme": "light",
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "ok": true
+    },
+    {
+      "screen": "kit",
+      "viewport": "768",
+      "theme": "dark",
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "ok": true
+    },
+    {
+      "screen": "kit",
+      "viewport": "768",
+      "theme": "light",
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "ok": true
+    },
+    {
+      "screen": "kit",
+      "viewport": "390",
+      "theme": "dark",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "ok": true
+    },
+    {
+      "screen": "kit",
+      "viewport": "390",
+      "theme": "light",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "ok": true
+    },
+    {
+      "screen": "login",
+      "viewport": "1440",
+      "theme": "dark",
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "ok": true
+    },
+    {
+      "screen": "login",
+      "viewport": "1440",
+      "theme": "dark",
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "ok": true
+    },
+    {
+      "screen": "login",
+      "viewport": "1440",
+      "theme": "light",
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "ok": true
+    },
+    {
+      "screen": "login",
+      "viewport": "1440",
+      "theme": "light",
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "ok": true
+    },
+    {
+      "screen": "login",
+      "viewport": "768",
+      "theme": "dark",
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "ok": true
+    },
+    {
+      "screen": "login",
+      "viewport": "768",
+      "theme": "dark",
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "ok": true
+    },
+    {
+      "screen": "login",
+      "viewport": "768",
+      "theme": "light",
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "ok": true
+    },
+    {
+      "screen": "login",
+      "viewport": "768",
+      "theme": "light",
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "ok": true
+    },
+    {
+      "screen": "login",
+      "viewport": "390",
+      "theme": "dark",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "ok": true
+    },
+    {
+      "screen": "login",
+      "viewport": "390",
+      "theme": "dark",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "ok": true
+    },
+    {
+      "screen": "login",
+      "viewport": "390",
+      "theme": "light",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "ok": true
+    },
+    {
+      "screen": "login",
+      "viewport": "390",
+      "theme": "light",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "ok": true
+    },
+    {
+      "screen": "orders",
+      "viewport": "1440",
+      "theme": "dark",
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "ok": true
+    },
+    {
+      "screen": "orders",
+      "viewport": "1440",
+      "theme": "light",
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "ok": true
+    },
+    {
+      "screen": "orders",
+      "viewport": "1440",
+      "theme": "light",
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "ok": true
+    },
+    {
+      "screen": "orders",
+      "viewport": "768",
+      "theme": "dark",
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "ok": true
+    },
+    {
+      "screen": "orders",
+      "viewport": "768",
+      "theme": "light",
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "ok": true
+    },
+    {
+      "screen": "orders",
+      "viewport": "390",
+      "theme": "dark",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "ok": true
+    },
+    {
+      "screen": "orders",
+      "viewport": "390",
+      "theme": "light",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "ok": true
+    },
+    {
+      "screen": "overview",
+      "viewport": "1440",
+      "theme": "dark",
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "ok": true
+    },
+    {
+      "screen": "overview",
+      "viewport": "1440",
+      "theme": "light",
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "ok": true
+    },
+    {
+      "screen": "overview",
+      "viewport": "768",
+      "theme": "dark",
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "ok": true
+    },
+    {
+      "screen": "overview",
+      "viewport": "768",
+      "theme": "light",
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "ok": true
+    },
+    {
+      "screen": "overview",
+      "viewport": "390",
+      "theme": "dark",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "ok": true
+    },
+    {
+      "screen": "overview",
+      "viewport": "390",
+      "theme": "light",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "ok": true
+    },
+    {
+      "screen": "overview-empty",
+      "viewport": "390",
+      "theme": "dark",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "ok": true
+    },
+    {
+      "screen": "overview-empty",
+      "viewport": "390",
+      "theme": "light",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "ok": true
+    },
+    {
+      "screen": "refunds-dialog",
+      "viewport": "1440",
+      "theme": "dark",
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "ok": true
+    },
+    {
+      "screen": "refunds-dialog",
+      "viewport": "1440",
+      "theme": "light",
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "ok": true
+    },
+    {
+      "screen": "refunds-dialog",
+      "viewport": "768",
+      "theme": "dark",
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "ok": true
+    },
+    {
+      "screen": "refunds-dialog",
+      "viewport": "768",
+      "theme": "light",
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "ok": true
+    },
+    {
+      "screen": "refunds-dialog",
+      "viewport": "390",
+      "theme": "dark",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "ok": true
+    },
+    {
+      "screen": "refunds-dialog",
+      "viewport": "390",
+      "theme": "light",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "ok": true
+    },
+    {
+      "screen": "refunds-pending",
+      "viewport": "1440",
+      "theme": "dark",
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "ok": true
+    },
+    {
+      "screen": "refunds-pending",
+      "viewport": "1440",
+      "theme": "light",
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "ok": true
+    },
+    {
+      "screen": "refunds-pending",
+      "viewport": "768",
+      "theme": "dark",
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "ok": true
+    },
+    {
+      "screen": "refunds-pending",
+      "viewport": "768",
+      "theme": "light",
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "ok": true
+    },
+    {
+      "screen": "refunds-pending",
+      "viewport": "390",
+      "theme": "dark",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "ok": true
+    },
+    {
+      "screen": "refunds-pending",
+      "viewport": "390",
+      "theme": "light",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "ok": true
+    },
+    {
+      "screen": "refunds-refunded",
+      "viewport": "1440",
+      "theme": "dark",
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "ok": true
+    },
+    {
+      "screen": "refunds-refunded",
+      "viewport": "1440",
+      "theme": "light",
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "ok": true
+    },
+    {
+      "screen": "refunds-refunded",
+      "viewport": "768",
+      "theme": "dark",
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "ok": true
+    },
+    {
+      "screen": "refunds-refunded",
+      "viewport": "768",
+      "theme": "light",
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "ok": true
+    },
+    {
+      "screen": "refunds-refunded",
+      "viewport": "390",
+      "theme": "dark",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "ok": true
+    },
+    {
+      "screen": "refunds-refunded",
+      "viewport": "390",
+      "theme": "light",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "ok": true
+    },
+    {
+      "screen": "users",
+      "viewport": "768",
+      "theme": "dark",
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "ok": true
+    },
+    {
+      "screen": "users",
+      "viewport": "768",
+      "theme": "light",
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "ok": true
+    },
+    {
+      "screen": "users",
+      "viewport": "390",
+      "theme": "dark",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "ok": true
+    },
+    {
+      "screen": "users",
+      "viewport": "390",
+      "theme": "light",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "ok": true
+    }
+  ],
+  "axe": {
+    "checks": 74,
+    "counts": {
+      "critical": 0,
+      "serious": 0,
+      "moderate": 0,
+      "minor": 0
+    },
+    "blocking": 0,
+    "known": 0,
+    "violations": []
+  }
+}
